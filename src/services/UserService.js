@@ -1,14 +1,16 @@
-const { hash } = require("bcryptjs")
+const { hash, compare } = require("bcryptjs")
 
 class UserService {
     constructor(UserRepository) {
         this.userRepository = UserRepository
     }
 
-    async createUser(name, email, password) {
+    async createUser(request) {
+        const { name, email, password } = request.body
+
         try {
 
-            const checkEmailInUsing = await this.userRepository.getByEmail(email)
+            const checkEmailInUsing = await this.userRepository.getByEmail({ email })
 
             if (checkEmailInUsing) {
                 throw new Error("Esse email já está em uso")
@@ -32,7 +34,7 @@ class UserService {
 
     async getUserByEmail(email) {
         try {
-            const user = await this.userRepository.getByEmail({email})
+            const user = await this.userRepository.getByEmail(email)
 
             if (!user) {
                 throw new Error("Usuário não encontrado")
@@ -44,6 +46,55 @@ class UserService {
                 return console.error(error.message)
             } else {
                 return console.error("Error in getUserByEmail in UserService")
+            }
+        }
+    }
+
+    async updateData(request) {
+        const { name, email, oldPassword, newPassword } = request.body
+        const userId = request.user.id
+
+        try {
+            const user = await this.userRepository.getById(userId)
+
+            if (!user) {
+                throw new Error("Usuário não encontrado, verifique se você está autenticado")
+            }
+
+            if (email) {
+                const emailExists = await this.userRepository.getByEmail(email)
+
+                if (emailExists && emailExists.id !== user.id) {
+                    throw new Error("O email já está em uso")
+                }
+            }
+
+            user.name = name ?? user.name
+            user.email = email ?? user.email
+
+            if (oldPassword && !newPassword) {
+                throw new Error("Você precisa informar sua senha anterior antes de criar uma nova")
+            }
+
+            if (oldPassword && newPassword) {
+                const checkMatchPasswords = await compare(oldPassword, user.password)
+
+                if (checkMatchPasswords) {
+                    throw new Error("Senha incorreta")
+                }
+
+                user.password = await hash(newPassword, 8)
+            }
+
+            await this.userRepository.updateData(user, userId)
+
+            return { message: "Informações atualizadas com sucesso", statusCode: 200 }
+
+        } catch (error) {
+            if (error.message) {
+                return { message: error.message, statusCode: 401 }
+            } else {
+                return { message: "Internal Several Error", statusCode: 500 }
             }
         }
     }
