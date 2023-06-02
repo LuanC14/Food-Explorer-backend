@@ -3,7 +3,7 @@ const knex = require("../database/knex/index")
 class UserRepository {
 
   async create({ name, email, cryptedPassword }) {
-    return await knex("users").insert({ name, email, password: cryptedPassword })
+    await knex("users").insert({ name, email, password: cryptedPassword })
   }
 
   async getByEmail(email) {

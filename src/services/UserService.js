@@ -39,13 +39,15 @@ class UserService {
             if (!user) {
                 throw new Error("Usuário não encontrado")
             }
-            return user
+            return { data: user, statusCode: 200 }
 
         } catch (error) {
             if (error.message) {
-                return console.error(error.message)
+                console.error(error.message)
+                return { statusCode: 404 }
             } else {
-                return console.error("Error in getUserByEmail in UserService")
+                console.error("Error in getUserByEmail in UserService")
+                return { statusCode: 404 }
             }
         }
     }
@@ -89,6 +91,37 @@ class UserService {
             await this.userRepository.updateData(user, userId)
 
             return { message: "Informações atualizadas com sucesso", statusCode: 200 }
+
+        } catch (error) {
+            if (error.message) {
+                return { message: error.message, statusCode: 401 }
+            } else {
+                return { message: "Internal Several Error", statusCode: 500 }
+            }
+        }
+    }
+
+    async toggleAdmin(request) {
+        const authenticatedUserId = request.user.id
+        const targetUserId = request.params
+
+        try {
+            const authenticatedUser = this.userRepository.getById(authenticatedUserId)
+            const targetUser = this.userRepository.getById(targetUserId)
+
+            if (authenticatedUser.isAdmin == false) {
+                throw new Error("Você não é um administrador do restaurante")
+            }
+
+            if (targetUser.email === "master@admin.com") {
+                throw new Error("Você não tem permissão para alterar o nível de acesso deste usuário")
+            }
+
+            targetUser.isAdmin == !targetUser.isAdmin
+
+            this.userRepository.updateData(targetUser, targetUserId)
+
+            return { message: "Permissão de administrador alterada com sucesso", statusCode: 200 }
 
         } catch (error) {
             if (error.message) {
