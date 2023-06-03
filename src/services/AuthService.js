@@ -42,7 +42,7 @@ class AuthService {
             if (error.message) {
                 return { message: error.message, statusCode: 401 }
             } else {
-                return { message: "Internal Several Error", statusCode: 500 }
+                return { message: "Internal Server Error", statusCode: 500 }
             }
         }
     }

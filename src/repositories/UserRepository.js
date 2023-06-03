@@ -10,7 +10,7 @@ class UserRepository {
     return await knex("users").where({ email }).first()
   }
 
-  async getById(userId) {
+  async getById(userId = 6) {
     return await knex("users").where({ id: userId }).first()
   }
 

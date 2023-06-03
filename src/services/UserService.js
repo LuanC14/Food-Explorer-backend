@@ -28,7 +28,7 @@ class UserService {
                 return { message: error.message, statusCode: 409 }
             }
 
-            return { message: "Internal Several Error", statusCode: 500 }
+            return { message: "Internal Server Error", statusCode: 500 }
         }
     }
 
@@ -46,9 +46,24 @@ class UserService {
                 console.error(error.message)
                 return { statusCode: 404 }
             } else {
-                console.error("Error in getUserByEmail in UserService")
-                return { statusCode: 404 }
+                console.error("Internal Server Error")
+                return { statusCode: 500 }
             }
+        }
+    }
+
+    async getUserById(id) {
+        try {
+            const user = await this.userRepository.getById(id)
+
+            if (!user) {
+                throw new Error("Usuário não encontrado")
+            }
+
+            return user
+
+        } catch (error) {
+            error.message ? console.error(error.message) : console.error("Internal Server Error")
         }
     }
 
@@ -96,30 +111,30 @@ class UserService {
             if (error.message) {
                 return { message: error.message, statusCode: 401 }
             } else {
-                return { message: "Internal Several Error", statusCode: 500 }
+                return { message: "Internal Server Error", statusCode: 500 }
             }
         }
     }
 
     async toggleAdmin(request) {
         const authenticatedUserId = request.user.id
-        const targetUserId = request.params
+        const { targetUserId } = request.params
 
         try {
-            const authenticatedUser = this.userRepository.getById(authenticatedUserId)
-            const targetUser = this.userRepository.getById(targetUserId)
+            const authenticatedUser = await this.userRepository.getById(authenticatedUserId)
+            const targetUser = await this.userRepository.getById(targetUserId)
 
-            if (authenticatedUser.isAdmin == false) {
-                throw new Error("Você não é um administrador do restaurante")
+            if (authenticatedUser.email != "master@admin.com") {
+                throw new Error("Apenas o administrador mestre pode alterar as permissões do usuário")
             }
 
-            if (targetUser.email === "master@admin.com") {
-                throw new Error("Você não tem permissão para alterar o nível de acesso deste usuário")
+            if (targetUser.email == "master@admin.com") {
+                throw new Error("Esse usuário não pode ter suas permissões removidas")
             }
 
-            targetUser.isAdmin == !targetUser.isAdmin
+            targetUser.isAdmin = false ? targetUser.isAdmin == true : targetUser.isAdmin == false
 
-            this.userRepository.updateData(targetUser, targetUserId)
+            await this.userRepository.updateData(targetUser, targetUserId)
 
             return { message: "Permissão de administrador alterada com sucesso", statusCode: 200 }
 
@@ -127,7 +142,7 @@ class UserService {
             if (error.message) {
                 return { message: error.message, statusCode: 401 }
             } else {
-                return { message: "Internal Several Error", statusCode: 500 }
+                return { message: "Internal Server Error", statusCode: 500 }
             }
         }
     }
