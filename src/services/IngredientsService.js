@@ -14,6 +14,14 @@ class IngredientsService {
 
         await this.ingredientsRepository.insert(ingredientsInsert)
     }
+
+    async getIngredientByName(name) {
+        return await this.ingredientsRepository.getByName(name)
+    }
+
+    async getIngredientById(id) {
+        return await this.ingredientsRepository.getById(id)
+    }
 }
 
 module.exports = IngredientsService

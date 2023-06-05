@@ -7,8 +7,20 @@ class MenuItemRepository {
         return id
     }
 
-    async getAllmenuItems() {
+    async getAll() {
         return await knex("menu_items").select()
+    }
+
+    async getById(id) {
+        return await knex("menu_items").select().where({id}).first()
+    }
+
+    async getByName(name) {
+        return await knex("menu_items").select().whereLike("name", `%${name}%`)
+    }
+
+    async delete(id) {
+        await knex("menu_items").where({id}).delete()
     }
 }
 

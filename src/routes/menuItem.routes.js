@@ -6,7 +6,9 @@ const authMiddleware = require("../middlewares/authMiddleware")
 const menuItemRouter = Router()
 const menuItemController = new MenuItemController()
 
-menuItemRouter.get("/", menuItemController.getAllMenuItems)
+menuItemRouter.get("/", menuItemController.getItems)
+menuItemRouter.get("/search", menuItemController.searchByNameAndIngredient)
 menuItemRouter.post("/", authMiddleware, menuItemController.createItem)
+menuItemRouter.delete("/:id", authMiddleware, menuItemController.deleteItemById)
 
 module.exports = menuItemRouter
