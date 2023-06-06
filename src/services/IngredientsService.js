@@ -22,6 +22,11 @@ class IngredientsService {
     async getIngredientById(id) {
         return await this.ingredientsRepository.getById(id)
     }
+
+    async deleteIngredient(id) {
+        await this.ingredientsRepository.delete(id)
+        return { statusCode: 204 }
+    }
 }
 
 module.exports = IngredientsService

@@ -14,7 +14,7 @@ class UserRepository {
     return await knex("users").where({ id: userId }).first()
   }
 
-  async updateData(user, userId) {
+  async update(user, userId) {
     await knex("users").where({ id: userId }).update(user)
   }
 }

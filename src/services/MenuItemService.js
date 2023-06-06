@@ -2,8 +2,8 @@ class MenuItemService {
 
     constructor(MenuItemRepository, IngredientsService, UserService) {
         this.menuItemRepository = MenuItemRepository
-        this.userService = UserService
         this.ingredientsService = IngredientsService
+        this.userService = UserService
     }
 
     async createItem(request) {
@@ -19,7 +19,7 @@ class MenuItemService {
                 throw new Error("Já existe um item com este nome, caso seja um item diferente, especifique no nome.")
             }
 
-            if (user.isAdmin == false) {
+            if (!user.isAdmin) {
                 throw new Error("Você não tem permissão para inserir items no menu.")
             }
 
@@ -37,7 +37,7 @@ class MenuItemService {
 
             const itemId = await this.menuItemRepository.create(item)
 
-            if (ingredients.length > 0) {
+            if (ingredients) {
                 await this.ingredientsService.insert(itemId, ingredients)
             }
 
@@ -61,6 +61,97 @@ class MenuItemService {
             }
 
             console.error(error);
+            return { statusCode: 500 }
+        }
+    }
+
+    async updateItem(request) {
+        const { name, description, ingredients } = request.body
+        const itemId = request.params.id
+        const userId = request.user.id
+
+        try {
+            const item = await this.menuItemRepository.getById(itemId)
+
+            if (!item) {
+                throw new Error("Item não encontrado")
+            }
+
+            const user = await this.userService.getUserById(userId)
+            console.log(user)
+
+            if (!user.isAdmin) {
+                throw new Error("Você não tem permissão para fazer alterações")
+            }
+
+            item.name = name ?? item.name
+            item.description = description ?? item.description
+
+            if (ingredients) {
+                await this.ingredientsService.insert(itemId, ingredients)
+            }
+
+            await this.menuItemRepository.update(itemId, item)
+
+            return { message: "Item atualizado com sucesso", statusCode: 200 }
+
+        } catch (error) {
+            if (error.message === "Você não tem permissão para fazer alterações") {
+                console.error(error.message)
+                return { message: error.message, statusCode: 404 }
+            }
+
+            if (error.message === "Você não tem permissão para fazer alterações") {
+                console.error(error.message)
+                return { message: error.message, statusCode: 401 }
+            }
+
+            return { message: "Internal Server Error", statusCode: 500 }
+        }
+    }
+
+    async updateImage(request, diskStorage) {
+        const imageFilename = request.file.filename
+        const userId = request.user.id
+        const itemId = request.params.id
+
+        try {
+            const user = await this.userService.getUserById(userId)
+
+            if (!user.isAdmin) {
+                throw new Error("Você não tem permissão para realizar esta operação")
+            }
+
+            const item = await this.menuItemRepository.getById(itemId)
+
+            if (!item) {
+                throw new Error("Item não encontrado")
+            }
+
+            if (item.image_url) {
+                await diskStorage.deleteFile(item.image_url)
+            }
+
+            const filename = await diskStorage.saveFile(imageFilename)
+
+            item.image_url = filename
+
+            console.log(item)
+
+            await this.menuItemRepository.update(itemId, item)
+
+            return { data: item, statusCode: 200 }
+
+
+        } catch (error) {
+            if (error.message === "Você não tem permissão para realizar esta operação") {
+                return { statusCode: 401 }
+            }
+
+            if (error.message === "Item não encontrado") {
+                return { statusCode: 404 }
+            }
+            console.error(error)
             return { statusCode: 500 }
         }
     }

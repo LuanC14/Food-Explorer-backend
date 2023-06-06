@@ -9,7 +9,8 @@ class AuthService {
         this.userService = userService
     }
 
-    async createSession(email, password) {
+    async createSession(request) {
+        const { email, password } = request.body
 
         try {
             const result = await this.userService.getUserByEmail(email)

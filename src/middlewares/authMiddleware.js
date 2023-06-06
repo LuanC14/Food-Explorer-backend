@@ -12,7 +12,13 @@ function authMiddleware(request, response, next) {
 
         const [bearer, token] = authHeader.split(" ")
 
-        const { sub: user_id } = verify(token, authConfig.jwt.secret)
+        const checkedToken = verify(token, authConfig.jwt.secret)
+
+        if(!checkedToken) {
+            throw new Error("Token inválido")
+        }
+
+        const { sub: user_id } = checkedToken
 
         request.user = {
             id: Number(user_id)
@@ -21,7 +27,7 @@ function authMiddleware(request, response, next) {
         return next()
 
     } catch (error) {
-        error.message ? response.status(401).send(error.message) : response.status(401).send("Token inválido")
+        error.message ? response.status(401).send(error.message) : response.status(500).send("Server Internal Error: auth middleware")
     }
 }
 

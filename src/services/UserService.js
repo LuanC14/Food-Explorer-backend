@@ -9,7 +9,6 @@ class UserService {
         const { name, email, password } = request.body
 
         try {
-
             const checkEmailInUsing = await this.userRepository.getByEmail({ email })
 
             if (checkEmailInUsing) {
@@ -23,12 +22,14 @@ class UserService {
             return { message: "Usuário criado com sucesso", statusCode: 201 }
 
         } catch (error) {
-
             if (error.message) {
+                console.error(error.message)
                 return { message: error.message, statusCode: 409 }
+            } else {
+                console.error(error)
+                return { message: "Internal Server Error", statusCode: 500 }
             }
 
-            return { message: "Internal Server Error", statusCode: 500 }
         }
     }
 
@@ -63,7 +64,7 @@ class UserService {
             return user
 
         } catch (error) {
-            error.message ? console.error(error.message) : console.error("Internal Server Error")
+            console.error(error)
         }
     }
 
@@ -75,6 +76,7 @@ class UserService {
             const user = await this.userRepository.getById(userId)
 
             if (!user) {
+                console.log(user)
                 throw new Error("Usuário não encontrado, verifique se você está autenticado")
             }
 
@@ -103,7 +105,7 @@ class UserService {
                 user.password = await hash(newPassword, 8)
             }
 
-            await this.userRepository.updateData(user, userId)
+            await this.userRepository.update(user, userId)
 
             return { message: "Informações atualizadas com sucesso", statusCode: 200 }
 
@@ -132,16 +134,18 @@ class UserService {
                 throw new Error("Esse usuário não pode ter suas permissões removidas")
             }
 
-            targetUser.isAdmin = false ? targetUser.isAdmin == true : targetUser.isAdmin == false
+            !targetUser.isAdmin ? targetUser.isAdmin == true : targetUser.isAdmin == false
 
-            await this.userRepository.updateData(targetUser, targetUserId)
+            await this.userRepository.update(targetUser, targetUserId)
 
             return { message: "Permissão de administrador alterada com sucesso", statusCode: 200 }
 
         } catch (error) {
             if (error.message) {
+                console.error(error.message)
                 return { message: error.message, statusCode: 401 }
             } else {
+                console.error(error)
                 return { message: "Internal Server Error", statusCode: 500 }
             }
         }

@@ -11,7 +11,11 @@ class IngredientsRepository {
     }
 
     async getById(id) {
-        return await knex("ingredients").select().where({menu_item_id: id})
+        return await knex("ingredients").select().where({ menu_item_id: id })
+    }
+
+    async delete(id) {
+        await knex("ingredients").where({ id }).delete()
     }
 }
 

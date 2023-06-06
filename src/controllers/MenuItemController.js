@@ -1,61 +1,61 @@
 const MenuItemRepository = require("../repositories/MenuItemRepository")
-const UserItemRepository = require("../repositories/UserRepository")
+const UserRepository = require("../repositories/UserRepository")
 const IngredientsRepository = require("../repositories/IngredientsRepository")
 
 const MenuItemService = require("../services/MenuItemService")
 const UserService = require("../services/UserService")
 const IngredientsService = require("../services/IngredientsService")
-const UserRepository = require("../repositories/UserRepository")
+
+const DiskStorage = require("../providers/DiskStorage")
 
 class MenuItemController {
 
-    async createItem(request, response) {
+    static injection() {
         const menuItemRepository = new MenuItemRepository()
-        const userItemRepository = new UserItemRepository()
+        const userRepository = new UserRepository()
         const ingredientsRepository = new IngredientsRepository()
-
-        const userService = new UserService(userItemRepository)
+        const userService = new UserService(userRepository)
         const ingredientsService = new IngredientsService(ingredientsRepository)
-
         const menuItemService = new MenuItemService(menuItemRepository, ingredientsService, userService)
-        const result = await menuItemService.createItem(request)
 
+        return { menuItemService }
+    }
+
+    async createItem(request, response) {
+        const { menuItemService } = MenuItemController.injection()
+        const result = await menuItemService.createItem(request)
         return response.status(result.statusCode).json(result.id)
     }
 
+    async setImage(request, response) {
+        const diskStorage = new DiskStorage()
+
+        const { menuItemService } = MenuItemController.injection()
+        const result = await menuItemService.updateImage(request, diskStorage)
+        return response.status(result.statusCode).json(result.data)
+    }
+
+    async updateItem(request, response) {
+        const { menuItemService } = MenuItemController.injection()
+        const result = await menuItemService.updateItem(request)
+        return response.status(result.statusCode).send(result.message)
+    }
+
     async getItems(request, response) {
-        const menuItemRepository = new MenuItemRepository()
-        const ingredientsRepository = new IngredientsRepository()
-
-        const ingredientsService = new IngredientsService(ingredientsRepository)
-
-        const menuItemService = new MenuItemService(menuItemRepository, ingredientsService)
+        const { menuItemService } = MenuItemController.injection()
         const result = await menuItemService.getItems(request)
-
         return response.status(result.statusCode).json(result.data)
     }
 
     async searchByNameAndIngredient(request, response) {
-        const menuItemRepository = new MenuItemRepository()
-        const ingredientsRepository = new IngredientsRepository()
-
-        const ingredientsService = new IngredientsService(ingredientsRepository)
-
-        const menuItemService = new MenuItemService(menuItemRepository, ingredientsService)
+        const { menuItemService } = MenuItemController.injection()
         const result = await menuItemService.searchItem(request)
-
         return response.status(result.statusCode).json(result.data)
     }
 
     async deleteItemById(request, response) {
-        const menuItemRepository = new MenuItemRepository()
-        const userRepository = new UserRepository()
-
-        const userService = new UserService(userRepository)
-
-        const menuItemService = new MenuItemService(menuItemRepository, null, userService)
+        const { menuItemService } = MenuItemController.injection()
         const result = await menuItemService.removeItem(request)
-
         return response.status(result.statusCode).json()
     }
 }
