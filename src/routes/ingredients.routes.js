@@ -6,6 +6,6 @@ const authMiddleware = require("../middlewares/authMiddleware")
 const ingredientRouter = Router()
 const ingredientController = new IngredientController()
 
-ingredientRouter.delete("/", authMiddleware, ingredientController.deleteIngredient)
+ingredientRouter.delete("/:ingredientId", authMiddleware, ingredientController.deleteIngredient)
 
 module.exports = ingredientRouter

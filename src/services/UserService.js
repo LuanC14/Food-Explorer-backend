@@ -120,11 +120,11 @@ class UserService {
 
     async toggleAdmin(request) {
         const authenticatedUserId = request.user.id
-        const { targetUserId } = request.params
+        const { userId } = request.params
 
         try {
             const authenticatedUser = await this.userRepository.getById(authenticatedUserId)
-            const targetUser = await this.userRepository.getById(targetUserId)
+            const targetUser = await this.userRepository.getById(userId)
 
             if (authenticatedUser.email != "master@admin.com") {
                 throw new Error("Apenas o administrador mestre pode alterar as permissões do usuário")
@@ -136,7 +136,7 @@ class UserService {
 
             !targetUser.isAdmin ? targetUser.isAdmin == true : targetUser.isAdmin == false
 
-            await this.userRepository.update(targetUser, targetUserId)
+            await this.userRepository.update(targetUser, userId)
 
             return { message: "Permissão de administrador alterada com sucesso", statusCode: 200 }
 

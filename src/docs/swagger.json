@@ -1,0 +1,515 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API da aplicação Food Explorer",
+        "description": "Esta API realiza todo o processo de CRUD do cliente no banco de dados SQLite3.",
+        "contact": {
+            "email": "luanchr14@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:4000/api/v1",
+            "description": "Ambiente de testes"
+        },
+        {
+            "url": "netfly",
+            "description": "Ambiente de produção"
+        }
+    ],
+    "paths": {
+        "/auth": {
+            "post": {
+                "summary": "Inicia sessão do usuário na aplicação",
+                "tags": [
+                    "Autenticação"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/authResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user": {
+            "post": {
+                "summary": "Cadastro de usuários",
+                "tags": [
+                    "Usuários"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/createOrUpdateUserData"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Atualizar os dados do usuário",
+                "description": "Não é necessário passar todos os dados pois dentro do serviço é utilizado o Nullish Operator, permitindo alterar por exemplo, somente o nome",
+                "tags": [
+                    "Usuários"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/createOrUpdateUserData"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{email}": {
+            "get": {
+                "summary": "Buscar um usuário pelo email",
+                "tags": [
+                    "Usuários"
+                ],
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/userData"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{userId}": {
+            "patch": {
+                "summary": "Torna um usuário comum em um administrador.",
+                "description": "Usuários admins tem acesso aos recursos de criação de itens e gerenciamento de pedidos.",
+                "tags": [
+                    "Usuários"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        "/menu": {
+            "get": {
+                "summary": "Retorna um ou todos os itens do menu do restaurante.",
+                "description": "Caso passado o ID, retorna o objeto do item, com seus ingredientes, caso contrário, será retornado uma Array contendo todos os objetos, mas sem os ingredientes.",
+                "tags": [
+                    "Itens do cardápio"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/menuItem"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Cadastrar um novo item no menu.",
+                "tags": [
+                    "Itens do cardápio"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/createOrUpdateMenuItemBody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/menu/search": {
+            "get": {
+                "summary": "Busca um ou mais itens do cardápio pelo nome do item ou seu ingrediente",
+                "description": "Busca um ou mais itens do cardápio pelo nome do item ou seu ingrediente",
+                "tags": [
+                    "Itens do cardápio"
+                ],
+                "parameters": [
+                    {
+                        "name": "name or ingredient",
+                        "in": "query",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/menuItemsWithoutIngredients"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/menu/{itemId}": {
+            "put": {
+                "summary": "Atualiza as informações de algum item",
+                "description": "Não é necessário passar todos os dados pois dentro do serviço é utilizado o Nullish Operator, permitindo alterar por exemplo, somente o nome",
+                "tags": [
+                    "Itens do cardápio"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "itemId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/createOrUpdateMenuItemBody"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Remove o item pelo seu ID",
+                "tags": [
+                    "Itens do cardápio"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "itemId",
+                        "in": "path",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        "/menu/image/{itemId}": {
+            "patch": {
+                "summary": "Alterar foto do item do cardápio",
+                "tags": [
+                    "Itens do cardápio"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "itemId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/menuItemsWithoutIngredients"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ingredient/{ingredientId}" : {
+            "delete": {
+                "summary": "Remove um ingrediente pelo seu ID",
+                "tags": [
+                    "Ingredientes"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "ingredientId",
+                        "in": "path",
+                        "required": true
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "createOrUpdateUserData": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    }
+                }
+            },
+            "userData": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "number"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "avatar_url": {
+                        "type": "string"
+                    },
+                    "isAdmin": {
+                        "type": "boolean"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "menuItem": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "number"
+                    },
+                    "user_id": {
+                        "type": "number"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "image_url": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "number"
+                    },
+                    "ingredients": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "menu_item_id": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "menuItemsWithoutIngredients": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "number"
+                    },
+                    "user_id": {
+                        "type": "number"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "image_url": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "number"
+                    }
+                }
+            },
+            "createOrUpdateMenuItemBody": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "number"
+                    }
+                }
+            },
+            "authResult": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "number"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "email": {
+                                "type": "string"
+                            },
+                            "isAdmin": {
+                                "type": "number"
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

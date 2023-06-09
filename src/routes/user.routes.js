@@ -9,6 +9,6 @@ const userController = new UserController()
 userRouter.get("/:email", userController.getUserByEmail)
 userRouter.post("/", userController.createUser)
 userRouter.put("/", authMiddleware, userController.updateData)
-userRouter.patch("/:targetUserId", authMiddleware, userController.toggleAdmin)
+userRouter.patch("/:userId", authMiddleware, userController.toggleAdmin)
 
 module.exports = userRouter

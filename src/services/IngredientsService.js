@@ -23,8 +23,9 @@ class IngredientsService {
         return await this.ingredientsRepository.getById(id)
     }
 
-    async deleteIngredient(id) {
-        await this.ingredientsRepository.delete(id)
+    async deleteIngredient(request) {
+        const ingredientId = request.params.ingredientId
+        await this.ingredientsRepository.delete(ingredientId)
         return { statusCode: 204 }
     }
 }

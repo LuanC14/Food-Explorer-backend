@@ -67,7 +67,7 @@ class MenuItemService {
 
     async updateItem(request) {
         const { name, description, ingredients } = request.body
-        const itemId = request.params.id
+        const itemId = request.params.itemId
         const userId = request.user.id
 
         try {
@@ -113,7 +113,7 @@ class MenuItemService {
     async updateImage(request, diskStorage) {
         const imageFilename = request.file.filename
         const userId = request.user.id
-        const itemId = request.params.id
+        const itemId = request.params.itemId
 
         try {
             const user = await this.userService.getUserById(userId)
@@ -228,7 +228,7 @@ class MenuItemService {
     }
 
     async removeItem(request) {
-        const { id } = request.params
+        const { itemId } = request.params
         const userId = request.user.id
 
         try {
@@ -236,11 +236,11 @@ class MenuItemService {
             const verifyIsMasterAdmin = user.email === "master@admin.com"
 
             if (verifyIsMasterAdmin) {
-                await this.menuItemRepository.delete(id)
+                await this.menuItemRepository.delete(itemId)
                 return { statusCode: 204 }
             }
 
-            const item = await this.menuItemRepository.getById(id)
+            const item = await this.menuItemRepository.getById(itemId)
 
             if (!item) {
                 throw new Error("Item não encontrado")
@@ -249,7 +249,7 @@ class MenuItemService {
             const checkItemCreatorId = item.user_id === userId
 
             if (checkItemCreatorId) {
-                await this.menuItemRepository.delete(id)
+                await this.menuItemRepository.delete(itemId)
                 return { statusCode: 204 }
             } else {
                 throw new Error("Você não pode remover um item que você não criou")

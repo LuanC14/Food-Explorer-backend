@@ -11,9 +11,9 @@ const upload = multer(uploadConfig.MULTER)
 
 menuItemRouter.get("/", menuItemController.getItems)
 menuItemRouter.get("/search", menuItemController.searchByNameAndIngredient)
-menuItemRouter.put("/:id", authMiddleware, menuItemController.updateItem)
-menuItemRouter.patch("/image/:id", authMiddleware, upload.single("image"), menuItemController.setImage)
+menuItemRouter.put("/:itemId", authMiddleware, menuItemController.updateItem)
+menuItemRouter.patch("/image/:itemId", authMiddleware, upload.single("image"), menuItemController.setImage)
 menuItemRouter.post("/", authMiddleware, menuItemController.createItem)
-menuItemRouter.delete("/:id", authMiddleware, menuItemController.deleteItemById)
+menuItemRouter.delete("/:itemId", authMiddleware, menuItemController.deleteItemById)
 
 module.exports = menuItemRouter
