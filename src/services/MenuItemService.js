@@ -13,7 +13,7 @@ class MenuItemService {
         try {
             const user = await this.userService.getUserById(userId)
             const allItems = await this.menuItemRepository.getAll()
-            const findExistsItemByName = allItems.some(item => item.name == name)
+            const findExistsItemByName = allItems.some(item => item.name === name)
 
             if (findExistsItemByName) {
                 throw new Error("Já existe um item com este nome, caso seja um item diferente, especifique no nome.")
@@ -45,22 +45,21 @@ class MenuItemService {
 
         } catch (error) {
 
-            if (error.message = "Já existe um item com este nome, caso seja um item diferente, especifique no nome.") {
+            if (error.message === "Já existe um item com este nome, caso seja um item diferente, especifique no nome.") {
                 console.error(error.message)
                 return { statusCode: 409 }
             }
 
-            if (error.message === "Você não tem permissão para inserir itens no Menu") {
+            if (error.message === "Você não tem permissão para inserir items no menu.") {
                 console.error(error.message)
                 return { statusCode: 401 }
             }
 
-            if (error.message === "O cardápio do restaurante só aceita drinks, refeições e sobremesas") {
+            if (error.message === "O cardápio do restaurante só aceita drinks, refeições e sobremesas.") {
                 console.error(error.message)
                 return { statusCode: 400 }
             }
 
-            console.error(error);
             return { statusCode: 500 }
         }
     }
@@ -96,16 +95,19 @@ class MenuItemService {
             return { message: "Item atualizado com sucesso", statusCode: 200 }
 
         } catch (error) {
-            if (error.message === "Você não tem permissão para fazer alterações") {
+
+            if (error.message === "Item não encontrado") {
                 console.error(error.message)
-                return { message: error.message, statusCode: 404 }
+                return { message: error.message, stausCode: 404 }
             }
+
 
             if (error.message === "Você não tem permissão para fazer alterações") {
                 console.error(error.message)
                 return { message: error.message, statusCode: 401 }
             }
 
+            console.error(error)
             return { message: "Internal Server Error", statusCode: 500 }
         }
     }
@@ -135,8 +137,6 @@ class MenuItemService {
             const filename = await diskStorage.saveFile(imageFilename)
 
             item.image_url = filename
-
-            console.log(item)
 
             await this.menuItemRepository.update(itemId, item)
 
@@ -185,8 +185,13 @@ class MenuItemService {
             return { data: item, statusCode: 200 }
 
         } catch (error) {
-            error.message ? console.error(error.message) : console.error(error)
-            return { statusCode: 404 }
+            if (error.message) {
+                console.error(error.message)
+                return { statusCode: 404 }
+            }
+
+            console.error(error)
+            return { statusCode: 500 }
         }
     }
 
@@ -227,11 +232,21 @@ class MenuItemService {
         }
     }
 
-    async removeItem(request) {
+    async removeItem(request, diskStorage) {
         const { itemId } = request.params
         const userId = request.user.id
 
         try {
+            const item = await this.menuItemRepository.getById(itemId)
+
+            if (!item) {
+                throw new Error("Item não encontrado")
+            }
+
+            if (item.image_url) {
+                await diskStorage.deleteFile(item.image_url)
+            }
+
             const user = await this.userService.getUserById(userId)
             const verifyIsMasterAdmin = user.email === "master@admin.com"
 
@@ -240,33 +255,29 @@ class MenuItemService {
                 return { statusCode: 204 }
             }
 
-            const item = await this.menuItemRepository.getById(itemId)
-
-            if (!item) {
-                throw new Error("Item não encontrado")
-            }
-
             const checkItemCreatorId = item.user_id === userId
 
-            if (checkItemCreatorId) {
-                await this.menuItemRepository.delete(itemId)
-                return { statusCode: 204 }
-            } else {
+            if (!checkItemCreatorId) {
                 throw new Error("Você não pode remover um item que você não criou")
             }
 
+            await this.menuItemRepository.delete(itemId)
+            return { statusCode: 204 }
+
         } catch (error) {
             if (error.message === "Item não encontrado") {
+                console.error(error.message)
                 return { statusCode: 404 }
             }
 
             if (error.message === "Você não pode remover um item que você não criou") {
+                console.error(error.message)
                 return { statusCode: 401 }
             }
 
+            console.error(error)
             return { statusCode: 500 }
         }
-
     }
 }
 

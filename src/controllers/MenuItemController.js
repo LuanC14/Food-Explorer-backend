@@ -54,8 +54,10 @@ class MenuItemController {
     }
 
     async deleteItemById(request, response) {
+        const diskStorage = new DiskStorage()
+
         const { menuItemService } = MenuItemController.injection()
-        const result = await menuItemService.removeItem(request)
+        const result = await menuItemService.removeItem(request, diskStorage)
         return response.status(result.statusCode).json()
     }
 }

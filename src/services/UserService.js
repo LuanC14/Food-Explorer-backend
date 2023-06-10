@@ -134,7 +134,7 @@ class UserService {
                 throw new Error("Esse usuário não pode ter suas permissões removidas")
             }
 
-            !targetUser.isAdmin ? targetUser.isAdmin == true : targetUser.isAdmin == false
+            !targetUser.isAdmin ? targetUser.isAdmin = true : targetUser.isAdmin = false
 
             await this.userRepository.update(targetUser, userId)
 
