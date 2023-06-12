@@ -9,7 +9,7 @@ class UserService {
         const { name, email, password } = request.body
 
         try {
-            const checkEmailInUsing = await this.userRepository.getByEmail({ email })
+            const checkEmailInUsing = await this.userRepository.getByEmail(email)
 
             if (checkEmailInUsing) {
                 throw new Error("Esse email já está em uso")
