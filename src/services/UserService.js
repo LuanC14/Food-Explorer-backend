@@ -16,8 +16,14 @@ class UserService {
             }
 
             const cryptedPassword = await hash(password, 8)
+            const id = await this.userRepository.create({ name, email, cryptedPassword })
 
-            await this.userRepository.create({ name, email, cryptedPassword })
+            if (email == "master@admin.com") {
+                const user = await this.userRepository.getById(id[0])
+                user.isAdmin = true
+                await this.userRepository.update(user, id[0])
+                return { message: "Administrador primário criado com sucesso!", statusCode: 201 };
+            }
 
             return { message: "Usuário criado com sucesso", statusCode: 201 }
 
@@ -127,11 +133,7 @@ class UserService {
             const targetUser = await this.userRepository.getById(userId)
 
             if (authenticatedUser.email != "master@admin.com") {
-                throw new Error("Apenas o administrador mestre pode alterar as permissões do usuário")
-            }
-
-            if (targetUser.email == "master@admin.com") {
-                throw new Error("Esse usuário não pode ter suas permissões removidas")
+                throw new Error("Apenas o administrador mestre pode alterar as permissões de outros usuários")
             }
 
             !targetUser.isAdmin ? targetUser.isAdmin = true : targetUser.isAdmin = false

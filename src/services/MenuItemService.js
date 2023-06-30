@@ -65,7 +65,7 @@ class MenuItemService {
     }
 
     async updateItem(request) {
-        const { name, description, ingredients } = request.body
+        const { name, description, type, ingredients, value  } = request.body
         const itemId = request.params.itemId
         const userId = request.user.id
 
@@ -77,7 +77,6 @@ class MenuItemService {
             }
 
             const user = await this.userService.getUserById(userId)
-            console.log(user)
 
             if (!user.isAdmin) {
                 throw new Error("Você não tem permissão para fazer alterações")
@@ -85,6 +84,8 @@ class MenuItemService {
 
             item.name = name ?? item.name
             item.description = description ?? item.description
+            item.value = value ?? item.value
+            item.type = type ?? item.type
 
             if (ingredients) {
                 await this.ingredientsService.insert(itemId, ingredients)
