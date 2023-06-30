@@ -5,7 +5,9 @@
 
 📑 Food Explorer consiste em um restaurante fictício. 
 
-Documentação do Swagger acesível em http://localhost:4000/api-docs/#/
+Documentação do Swagger:
+ Ambiente de desenvolvimento: http://localhost:4000/api/v1/api-docs/
+ Ambiente de produção: https://foodexplorer-backend-ddea.onrender.com/api/v1/api-docs/
 
 ---
 
