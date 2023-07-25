@@ -16,11 +16,7 @@ app.use(routes)
 
 database()
 
-<<<<<<< HEAD
-const PORT = process.env.PORT || 4000
-=======
 const PORT = process.env.PORT
->>>>>>> 83522374837b205bbe03c2b79dc252bcc2e82148
 app.listen(PORT, () => {
     console.log(`HTTP Server is running on PORT ${PORT}`)
 })
