@@ -14,8 +14,8 @@
             "description": "Ambiente de testes"
         },
         {
-            "url": "netfly",
-            "description": "Ambiente de produção"
+            "url": "https://foodexplorer-backend-ddea.onrender.com/api/v1/api-docs/",
+            "description": "Ambiente de produção na plataforma Render"
         }
     ],
     "paths": {
@@ -329,7 +329,7 @@
                 }
             }
         },
-        "/ingredient/{ingredientId}" : {
+        "/ingredient/{ingredientId}": {
             "delete": {
                 "summary": "Remove um ingrediente pelo seu ID",
                 "tags": [
@@ -472,8 +472,17 @@
                     "description": {
                         "type": "string"
                     },
+                    "type": {
+                        "type": "string"
+                    },
                     "value": {
                         "type": "number"
+                    },
+                    "ingredients": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 }
             },

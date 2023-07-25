@@ -5,12 +5,14 @@
 
 📑 Food Explorer consiste em um restaurante fictício. 
 
-Documentação do Swagger acesível em http://localhost:4000/api-docs/#/
+### 📂 Documentação do Swagger:
+ - Ambiente de desenvolvimento: http://localhost:4000/api/v1/api-docs/
+ - Ambiente de produção: https://foodexplorer-backend-ddea.onrender.com/api/v1/api-docs/
 
 ---
 
-### Como rodar a aplicação localmente:
-- No diretório desejado rode o comando: ``` git clone https://github.com/LuanC14/Food_Explorer_frontend.git ```
+### 📑  Como rodar a aplicação localmente:
+- No diretório desejado rode o comando: ``` git clone https://github.com/LuanC14/Food_Explorer_backend.git ```
 - Verifique se você está na pasta raiz do projeto e rode o comando ``` npm install ```
 - Feito isso, utilize o comando ``` npm run dev ``` para executar o programa.
 
@@ -25,7 +27,7 @@ Documentação do Swagger acesível em http://localhost:4000/api-docs/#/
 
 ---
 
-#### Arquitetura
+#### 🕋 Arquitetura
 Nessa API foi aplicado conceitos de SOLID e uma arquitetura MVC. Todos os serviços estão devidamente separados, assim como os repositórios
 
 ---
@@ -46,6 +48,6 @@ Caso clone o projeto e pretende resetar o banco de dados, basta criar um novo us
 - Documentação com Swagger
 
 ### ❗ Features a adicionar:
-- Finalização do Swagger
 - Realização de testes automatizados com Jest
+- Tabela no banco de dados de histórico de compras efetuadas.
 
